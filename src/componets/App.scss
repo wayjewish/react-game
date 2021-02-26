@@ -1,0 +1,60 @@
+.game {
+    width:100%;
+    margin: 0 auto;
+
+    @media (min-width:768px) {
+        & {
+            width: 500px;
+        }
+    }
+    @media (min-width:1200px) {
+        & {
+            width: 800px;
+        }
+    }
+    @media (min-width:1500px) {
+        & {
+            width: 1000px;
+        }
+    }
+    @media (min-width: 1700px) {
+        & {
+            width: 1200px;
+        }
+    }
+}
+
+.cards {
+    display: grid;
+    grid-gap: 5px;
+
+    &_count8 {
+        grid-template-columns: repeat(4, auto);
+        grid-template-rows: repeat(2, 1fr);
+    }
+    &_count12 {
+        grid-template-columns: repeat(4, auto);
+        grid-template-rows: repeat(3, 1fr);
+    }
+
+    @media (min-width:768px) {
+        & {
+            grid-gap: 10px;
+        }
+    }
+    @media (min-width:1200px) {
+        & {
+            grid-gap: 15px;
+        }
+
+        &_count12 {
+            grid-template-columns: repeat(6, auto);
+            grid-template-rows: repeat(2, 1fr);
+        }
+    }
+    @media (min-width:1500px) {
+        & {
+            grid-gap: 20px;
+        }
+    }
+}
