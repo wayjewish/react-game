@@ -55,8 +55,8 @@ const data = {
   ],
   logos: [
     { id: 'angular', img: 'angular.jpg' },
-    { id: 'c#', img: 'c#.jpg' },
-    { id: 'c++', img: 'c++.jpg' },
+    { id: 'c-sharp', img: 'c-sharp.jpg' },
+    { id: 'c-plus-plus', img: 'c-plus-plus.jpg' },
     { id: 'css', img: 'css.jpg' },
     { id: 'github', img: 'github.jpg' },
     { id: 'html', img: 'html.jpg' },
