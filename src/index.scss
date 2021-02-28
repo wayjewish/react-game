@@ -1,6 +1,137 @@
+
+
 #app {
     width:100%;
     padding: 20px;
     margin: 0;
     box-sizing: border-box;
 }
+
+.game {
+    width:100%;
+    margin: 0 auto;
+
+    @media (min-width:768px) {
+        & {
+            width: 500px;
+        }
+    }
+    @media (min-width:1200px) {
+        & {
+            width: 800px;
+        }
+    }
+    @media (min-width:1500px) {
+        & {
+            width: 1000px;
+        }
+    }
+    @media (min-width: 1700px) {
+        & {
+            /*width: 1200px;*/
+        }
+    }
+}
+
+.panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 30px;
+
+    &__params{
+        font-size: 20px;
+    }
+}
+
+.cards {
+    display: grid;
+    grid-gap: 5px;
+  
+    &_count8 {
+        grid-template-columns: repeat(4, auto);
+        grid-template-rows: repeat(2, 1fr);
+    }
+    &_count12 {
+        grid-template-columns: repeat(4, auto);
+        grid-template-rows: repeat(3, 1fr);
+    }
+  
+    @media (min-width:768px) {
+        & {
+            grid-gap: 10px;
+        }
+    }
+    @media (min-width:1200px) {
+        & {
+            grid-gap: 15px;
+        }
+  
+        &_count12 {
+            grid-template-columns: repeat(6, auto);
+            grid-template-rows: repeat(2, 1fr);
+        }
+    }
+    @media (min-width:1500px) {
+        & {
+            grid-gap: 20px;
+        }
+    }
+  }
+
+  .card {
+    position: relative;
+    display: flex;
+    border: 2px solid #bababa;
+    border-radius: 20px;
+    box-sizing: border-box;
+    cursor: pointer;
+  
+    transform: rotateY(180deg);
+    transform-style: preserve-3d;
+    transition: transform 0.8s, border-color .8s;
+  
+    &_flip {
+        transform: rotateY(0deg);
+    }
+  
+    &__img {
+        width: 100%;
+        height: 100%;
+        border-radius: 18px;
+  
+        backface-visibility: hidden;
+    }
+  
+    &__back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+  
+        width: 100%;
+        height: 100%;
+  
+        border-radius: 18px;
+        transform: rotateY(180deg);
+        background: linear-gradient(45deg, #1fa5ff 0%, #1053ff 100%) no-repeat;
+        background-size: 100%;
+  
+        backface-visibility: hidden;
+    }
+  }
+
+  .settings {
+    margin-top: 30px;
+
+    font-size: 20px;
+
+    &__list {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+}
+

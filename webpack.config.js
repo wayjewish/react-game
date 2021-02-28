@@ -54,9 +54,9 @@ module.exports = {
 
   optimization: {
     //minimize: true,
-    minimizer: [
+    /*minimizer: [
       new CssMinimizerPlugin(),
-    ],
+    ],*/
   },
 
   plugins: [
@@ -70,10 +70,10 @@ module.exports = {
         to: path.resolve(__dirname, 'dist'),
       },
     ]),*/
-    new BundleAnalyzerPlugin({
+    /*new BundleAnalyzerPlugin({
       analyzerPort: 9000,
       openAnalyzer: false,
-    }),
+    }),*/
   ],
 
   devtool: 'source-map',

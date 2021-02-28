@@ -1,8 +1,11 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-vars */
-/* eslint-disable spaced-comment */
+
 import React, { useState, useEffect } from 'react';
-import './App.scss';
-import Card from './Card/Card';
+import Panel from './Panel/Panel';
+import Cards from './Cards/Cards';
+import Settings from './Settings/Settings';
+
 import data from '../../public/data';
 
 function shuffleArray(array) {
@@ -25,43 +28,73 @@ function generateCards(count) {
   return shuffleArray(cards2);
 }
 
-function App() {
-  const [totalCards, setTotalCards] = useState(12);
-  //const [typeCards, setTypeCards] = useState();
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-  const [cards, setCards] = useState(generateCards(12));
+const arrAudio = [
+  [
+    'fon.mp3',
+  ],
+  [
+    'start.mp3',
+    'success.mp3',
+    'fail.mp3',
+    'lose.mp3',
+    'win.mp3',
+  ],
+];
+
+function generateAudio(arr, volume) {
+  const arrRes = arr.map((item) => new Audio(`../../public/sound/${item}`));
+
+  arrRes.forEach((item) => {
+    item.volume = volume;
+  });
+
+  return arrRes;
+}
+
+function App() {
+  const [totalCards, setTotalCards] = useState(12);//кол-во карт
+  const [typeCards, setTypeCards] = useState(null);//вид карт
+  const [time, setTimes] = useState(0);//время
+  const [fails, setFails] = useState(0);//ошибок
+
+  const [audio, setAudio] = useState({
+    music: {
+      list: generateAudio(arrAudio[0], 1),
+      volume: 1,
+      on: true,
+    },
+    sound: {
+      list: generateAudio(arrAudio[1], 1),
+      volume: 1,
+      on: true,
+    },
+  });//аудио
+
+  const [workGame, setWorkGame] = useState(false);//работает ли игра
+  const [disabledClick, setDisabledClick] = useState(false);//временный блок на нажатия
+
+  const [cards, setCards] = useState(generateCards(12));//карточки
   const [firstCard, setFirstCard] = useState(null);//первая активная карта
   const [secondCard, setSecondCard] = useState(null);//вторая активная карта
-  const [guessCards, setGuessCards] = useState(null);//угаданные карты
-  const [disabledGuess, setDisabledGuess] = useState(false);//временный блок на нажатия
+  const [guessCards, setGuessCards] = useState(0);//кол-во угаданных карт
 
   function setCardFlip(activeCard, activeFlip) {
     setCards((prev) => prev.map((card) => {
       if (card.id !== activeCard.id) return card;
 
-      const newCard = card;
-      newCard.isFlip = activeFlip;
-      return newCard;
+      return { ...card, isFlip: activeFlip };
     }));
-
-    /*setCards((prevState) => {
-      const newState = prevState;
-      const index = newState.indexOf(activeCard);
-
-      newState[index].isFlip = activeFlip;
-      console.log(newState, index);
-
-      return { ...newState };
-    });*/
   }
 
   function setCardGuess(activeCard, activeGuess) {
     setCards((prev) => prev.map((card) => {
       if (card.id !== activeCard.id) return card;
 
-      const newCard = card;
-      newCard.isGuess = activeGuess;
-      return newCard;
+      return { ...card, isGuess: activeGuess };
     }));
   }
 
@@ -71,27 +104,39 @@ function App() {
   }
 
   function onSuccessGuess() {
-    setCardGuess(firstCard, false);
-    setCardGuess(secondCard, false);
+    setCardGuess(firstCard, true);
+    setCardGuess(secondCard, true);
+
+    audio.sound.list[1].play();
+    setGuessCards((prevCount) => prevCount + 2);
 
     resetFirstAndSecondCards();
   }
 
   function onFailureGuess() {
-    setDisabledGuess(true);
+    setDisabledClick(true);
+
+    audio.sound.list[2].play();
+    setFails((prevCount) => prevCount + 1);
 
     setTimeout(() => {
       setCardFlip(firstCard, false);
     }, 900);
     setTimeout(() => {
       setCardFlip(secondCard, false);
-      setDisabledGuess(false);
+      setDisabledClick(false);
     }, 1000);
 
     resetFirstAndSecondCards();
   }
 
   useEffect(() => {
+    if (guessCards === totalCards) {
+      console.log('win');
+      setWorkGame(false);
+      return;
+    }
+
     if (!firstCard || !secondCard) return;
 
     if (firstCard.code === secondCard.code) {
@@ -99,13 +144,12 @@ function App() {
     } else {
       onFailureGuess();
     }
-  }, [firstCard, secondCard]);
+  }, [firstCard, secondCard, guessCards]);
 
   function onCardClick(card) {
-    if (disabledGuess || card.isFlip) return;
+    if (!workGame || disabledClick || card.isFlip) return;
 
     setCardFlip(card, true);
-    console.log(cards);
 
     if (firstCard) {
       setSecondCard(card);
@@ -114,18 +158,70 @@ function App() {
     }
   }
 
+  function setCardFlipAll(activeFlip) {
+    setCards((prev) => prev.map((card) => ({ ...card, isFlip: activeFlip })));
+  }
+
+  async function startGame() {
+    if (disabledClick) return;
+    setDisabledClick(true);
+
+    if (workGame) {
+      setCardFlipAll(false);
+      await sleep(1000);
+
+      const newCards = await generateCards(totalCards);
+      setCards(newCards);//я сосал
+      await sleep(1000);//я меня ебали
+    }
+
+    console.log('startGame');
+    setWorkGame(true);
+
+    setCardFlipAll(true);
+    setTimeout(() => {
+      audio.sound.list[0].play();
+      setCardFlipAll(false);
+    }, 2000);
+
+    setTimeout(() => {
+      setDisabledClick(false);
+    }, 3000);
+  }
+
+  function changeVolime(input) {
+    const { id } = input.target;
+    const value = Number(input.target.value) / 10;
+
+    const newAudio = { ...audio };
+    newAudio[id].volume = value;
+    setAudio(newAudio);
+
+    audio[id].list.forEach((item) => {
+      item.volume = value;
+    });
+  }
+
+  useEffect(() => {
+    if (audio.music.list[0].paused && audio.music.on) {
+      audio.music.list[0].play();
+      audio.music.list[0].loop = true;
+    }
+  }, [audio]);
+
   return (
     <div className="game">
-      <div className={`cards cards_count${totalCards}`}>
-        {cards.map((card) => (
-          <Card
-            key={card.id}
-            img={card.img}
-            isFlip={card.isFlip}
-            onClick={() => onCardClick(card)}
-          />
-        ))}
-      </div>
+      <Panel
+        time={time}
+        fails={fails}
+        textButton={workGame ? 'Рестарт' : 'Новая игра'}
+        onClick={() => startGame()}
+      />
+      <Cards totalCards={totalCards} cards={cards} onClick={(card) => onCardClick(card)} />
+      <Settings
+        audio={audio}
+        onChange={(input) => changeVolime(input)}
+      />
     </div>
   );
 }
