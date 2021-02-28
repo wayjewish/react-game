@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-vars */
 
@@ -34,22 +35,23 @@ function sleep(ms) {
 
 const arrAudio = [
   [
-    'fon.mp3',
+    { name: 'fon', audio: 'fon.mp3' },
   ],
   [
-    'start.mp3',
-    'success.mp3',
-    'fail.mp3',
-    'lose.mp3',
-    'win.mp3',
+    { name: 'start', audio: 'start.mp3' },
+    { name: 'success', audio: 'success.mp3' },
+    { name: 'fail', audio: 'fail.mp3' },
+    { name: 'lose', audio: 'lose.mp3' },
+    { name: 'win', audio: 'win.mp3' },
   ],
 ];
 
 function generateAudio(arr, volume) {
-  const arrRes = arr.map((item) => new Audio(`../../public/sound/${item}`));
+  const arrRes = {};
 
-  arrRes.forEach((item) => {
-    item.volume = volume;
+  arr.forEach((item) => {
+    arrRes[item.name] = new Audio(`../../public/sound/${item.audio}`);
+    arrRes[item.name].volume = volume;
   });
 
   return arrRes;
@@ -63,12 +65,12 @@ function App() {
 
   const [audio, setAudio] = useState({
     music: {
-      list: generateAudio(arrAudio[0], 1),
+      list: generateAudio(arrAudio[0], 0.5),
       volume: 1,
       on: true,
     },
     sound: {
-      list: generateAudio(arrAudio[1], 1),
+      list: generateAudio(arrAudio[1], 0.5),
       volume: 1,
       on: true,
     },
@@ -81,6 +83,8 @@ function App() {
   const [firstCard, setFirstCard] = useState(null);//первая активная карта
   const [secondCard, setSecondCard] = useState(null);//вторая активная карта
   const [guessCards, setGuessCards] = useState(0);//кол-во угаданных карт
+
+  /*-------------------card-----------------------*/
 
   function setCardFlip(activeCard, activeFlip) {
     setCards((prev) => prev.map((card) => {
@@ -98,6 +102,10 @@ function App() {
     }));
   }
 
+  function setCardFlipAll(activeFlip) {
+    setCards((prev) => prev.map((card) => ({ ...card, isFlip: activeFlip })));
+  }
+
   function resetFirstAndSecondCards() {
     setFirstCard(null);
     setSecondCard(null);
@@ -107,7 +115,7 @@ function App() {
     setCardGuess(firstCard, true);
     setCardGuess(secondCard, true);
 
-    audio.sound.list[1].play();
+    playAudio('success', 'sound');
     setGuessCards((prevCount) => prevCount + 2);
 
     resetFirstAndSecondCards();
@@ -116,7 +124,7 @@ function App() {
   function onFailureGuess() {
     setDisabledClick(true);
 
-    audio.sound.list[2].play();
+    playAudio('fail', 'sound');
     setFails((prevCount) => prevCount + 1);
 
     setTimeout(() => {
@@ -128,6 +136,18 @@ function App() {
     }, 1000);
 
     resetFirstAndSecondCards();
+  }
+
+  function onCardClick(card) {
+    if (!workGame || disabledClick || card.isFlip) return;
+
+    setCardFlip(card, true);
+
+    if (firstCard) {
+      setSecondCard(card);
+    } else {
+      setFirstCard(card);
+    }
   }
 
   useEffect(() => {
@@ -146,27 +166,16 @@ function App() {
     }
   }, [firstCard, secondCard, guessCards]);
 
-  function onCardClick(card) {
-    if (!workGame || disabledClick || card.isFlip) return;
-
-    setCardFlip(card, true);
-
-    if (firstCard) {
-      setSecondCard(card);
-    } else {
-      setFirstCard(card);
-    }
-  }
-
-  function setCardFlipAll(activeFlip) {
-    setCards((prev) => prev.map((card) => ({ ...card, isFlip: activeFlip })));
-  }
+  /*-------------------Game-----------------------*/
 
   async function startGame() {
     if (disabledClick) return;
     setDisabledClick(true);
 
     if (workGame) {
+      resetFirstAndSecondCards();
+      setFails(0);
+
       setCardFlipAll(false);
       await sleep(1000);
 
@@ -180,7 +189,7 @@ function App() {
 
     setCardFlipAll(true);
     setTimeout(() => {
-      audio.sound.list[0].play();
+      playAudio('start', 'sound');
       setCardFlipAll(false);
     }, 2000);
 
@@ -189,24 +198,61 @@ function App() {
     }, 3000);
   }
 
-  function changeVolime(input) {
-    const { id } = input.target;
-    const value = Number(input.target.value) / 10;
+  /*-------------------volime-----------------------*/
 
+  function playAudio(name, type) {
+    if (!audio[type].on) return;
+
+    audio[type].list[name].play();
+  }
+
+  function changeVolime(id, value) {
     const newAudio = { ...audio };
+    const { list } = audio[id];
+
     newAudio[id].volume = value;
     setAudio(newAudio);
 
-    audio[id].list.forEach((item) => {
-      item.volume = value;
+    Object.keys(list).forEach((key) => {
+      list[key].volume = value;
     });
   }
 
+  function changeVolimeMusic(input) {
+    const id = 'music';
+    const value = Number(input.target.value) / 10;
+
+    changeVolime(id, value);
+  }
+
+  function changeVolimeSound(input) {
+    const id = 'sound';
+    const value = Number(input.target.value) / 10;
+
+    changeVolime(id, value);
+  }
+
+  function switchMusic() {
+    const id = 'music';
+
+    const newAudio = { ...audio };
+    newAudio[id].on = !newAudio[id].on;
+    setAudio(newAudio);
+  }
+  function switchSound() {
+    const id = 'sound';
+
+    const newAudio = { ...audio };
+    newAudio[id].on = !newAudio[id].on;
+    setAudio(newAudio);
+  }
+
   useEffect(() => {
-    if (audio.music.list[0].paused && audio.music.on) {
-      audio.music.list[0].play();
-      audio.music.list[0].loop = true;
-    }
+    const { fon } = audio.music.list;
+
+    if (!fon.loop) fon.loop = true;
+    if (fon.paused && audio.music.on) fon.play();
+    if (!fon.paused && !audio.music.on) fon.pause();
   }, [audio]);
 
   return (
@@ -220,7 +266,10 @@ function App() {
       <Cards totalCards={totalCards} cards={cards} onClick={(card) => onCardClick(card)} />
       <Settings
         audio={audio}
-        onChange={(input) => changeVolime(input)}
+        onChangeVolimeMusic={(input) => changeVolimeMusic(input)}
+        onChangeVolimeSound={(input) => changeVolimeSound(input)}
+        switchMusic={switchMusic}
+        switchSound={switchSound}
       />
     </div>
   );
