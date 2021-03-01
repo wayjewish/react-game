@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import Panel from './Panel/Panel';
 import Cards from './Cards/Cards';
 import Settings from './Settings/Settings';
+import Stats from './Stats/Stats';
 import EndGame from './EndGame/EndGame';
 import Footer from './Footer/Footer';
 
@@ -90,6 +91,79 @@ function App() {
     counter: 0, //секунд
   });
 
+  const [stats, setStats] = useState([
+    {
+      nameEndGame: 'Победа',
+      fails: 1,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Проигрыш',
+      fails: 2,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Победа',
+      fails: 3,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Проигрыш',
+      fails: 4,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Победа',
+      fails: 5,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Проигрыш',
+      fails: 6,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Победа',
+      fails: 7,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Проигрыш',
+      fails: 8,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Победа',
+      fails: 9,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+    {
+      nameEndGame: 'Проигрыш',
+      fails: 10,
+      time: '12:34',
+      totalCards: 12,
+      typeCards: 'cards',
+    },
+  ]);
+
   /*-------------------card-----------------------*/
 
   function setCardFlip(activeCard, activeFlip) {
@@ -165,9 +239,14 @@ function App() {
       setWorkGame(false);
       setEndGame(true);
 
-      changePopup('showEndGame', true);
-      changePopup('title', 'Победа');
-      changePopup('text', 'Выигрыш есть - можно поесть');
+      setPopups({
+        ...popups,
+        showEndGame: true,
+        title: 'Победа',
+        text: 'Выигрыш есть - можно поесть',
+      });
+
+      addInStats('Победа');
 
       return;
     }
@@ -180,9 +259,16 @@ function App() {
       setWorkGame(false);
       setEndGame(true);
 
-      changePopup('showEndGame', true);
-      changePopup('title', 'Проигрыш');
-      changePopup('text', 'Если ты проиграл, значит, ты не выйграл');
+      setPopups({
+        ...popups,
+        showEndGame: true,
+        title: 'Проигрыш',
+        text: 'Если ты проиграл, значит, ты не выйграл',
+      });
+
+      addInStats('Проигрыш');
+
+      return;
     }
 
     if (!firstCard || !secondCard) return;
@@ -213,19 +299,15 @@ function App() {
     setCardFlipAll(true);
     setTimeout(() => {
       setCardFlipAll(false);
-    }, 2000);
-
-    setTimeout(() => {
       setDisabledClick(false);
       setCounter(true, 0);
-    }, 3000);
+    }, 2000);
   }
 
   async function resetGame() {
     console.log('resetGame');
 
     resetFirstAndSecondCards();
-    console.log('тут');
     setFails(0);
     setCounter(false, 0);
 
@@ -236,7 +318,6 @@ function App() {
     }
 
     const newCards = await generateCards(settings.totalCards, settings.typeCards);
-    console.log(newCards);
     setCards(newCards);//я сосал
     await sleep(1000);//меня ебали
   }
@@ -256,11 +337,14 @@ function App() {
     sound.play();
   }
 
-  function changeVolime(id, value) {
-    const newAudio = { ...audio };
-    const { list } = audio[id];
+  function changeVolime(el) {
+    const name = el.target.getAttribute('name');
+    const value = Number(el.target.value) / 10;
 
-    newAudio[id].volume = value;
+    const newAudio = { ...audio };
+    const { list } = audio[name];
+
+    newAudio[name].volume = value;
     setAudio(newAudio);
 
     Object.keys(list).forEach((key) => {
@@ -268,32 +352,11 @@ function App() {
     });
   }
 
-  function changeVolimeMusic(input) {
-    const id = 'music';
-    const value = Number(input.target.value) / 10;
-
-    changeVolime(id, value);
-  }
-
-  function changeVolimeSound(input) {
-    const id = 'sound';
-    const value = Number(input.target.value) / 10;
-
-    changeVolime(id, value);
-  }
-
-  function switchMusic() {
-    const id = 'music';
+  function switchOnAudio(el) {
+    const name = el.target.getAttribute('name');
 
     const newAudio = { ...audio };
-    newAudio[id].on = !newAudio[id].on;
-    setAudio(newAudio);
-  }
-  function switchSound() {
-    const id = 'sound';
-
-    const newAudio = { ...audio };
-    newAudio[id].on = !newAudio[id].on;
+    newAudio[name].on = !newAudio[name].on;
     setAudio(newAudio);
   }
 
@@ -307,20 +370,6 @@ function App() {
 
   /*-------------------settings-----------------------*/
 
-  function changeSetting(name, value) {
-    if (settings[name] === value) return;
-
-    const newSettings = { ...settings };
-
-    Object.keys(newSettings).forEach((key) => {
-      if (key === name) newSettings[key] = value;
-    });
-
-    console.log(newSettings);
-
-    setSettings(newSettings);
-  }
-
   function onSettingClick(el) {
     if (disabledClick) return;
 
@@ -330,13 +379,14 @@ function App() {
       value = Number(value);
     }
 
-    changeSetting(name, value);
+    setSettings({
+      ...settings,
+      [name]: value,
+    });
   }
 
   useEffect(() => {
     setWorkGame(false);
-
-    console.log(settings);
     resetGame();
   }, [settings]);
 
@@ -345,28 +395,20 @@ function App() {
   function changePopup(name, value) {
     if (popups[name] === value) return;
 
-    const newPopups = { ...popups };
-
-    Object.keys(newPopups).forEach((key) => {
-      if (key === name) newPopups[key] = value;
+    setPopups({
+      ...popups,
+      [name]: value,
     });
-
-    setPopups(newPopups);
-  }
-
-  function closePopupEndGame() {
-    changePopup('showEndGame', false);
-    changePopup('title', '');
-    changePopup('text', '');
   }
 
   /*-------------------counter-----------------------*/
 
   function setCounter(on, counter) {
-    const newTimer = { ...timer };
-    newTimer.on = on;
-    newTimer.counter = counter;
-    setTimer(newTimer);
+    setTimer({
+      ...timer,
+      on,
+      counter,
+    });
 
     setTime(secondsToTime(counter));
   }
@@ -374,16 +416,33 @@ function App() {
   useEffect(() => {
     const setRunTimer = timer.on > 0
     && setInterval(() => {
-      const newTimer = { ...timer };
-      newTimer.counter = timer.counter + 1;
+      setTime(secondsToTime(timer.counter + 1));
 
-      setTime(secondsToTime(newTimer.counter));
-
-      setTimer(newTimer);
+      setTimer({
+        ...timer,
+        counter: timer.counter + 1,
+      });
     }, 1000);
 
     return () => clearInterval(setRunTimer);
   }, [timer]);
+
+  /*-------------------stats-----------------------*/
+
+  function addInStats(nameEndGame) {
+    const newItem = {
+      nameEndGame,
+      fails,
+      time,
+      totalCards: settings.totalCards,
+      typeCards: settings.typeCards,
+    };
+
+    const newStats = stats.slice(0, 9);
+    newStats.unshift(newItem);
+
+    setStats(newStats);
+  }
 
   /*-------------------return-----------------------*/
 
@@ -405,10 +464,15 @@ function App() {
           settings={settings}
           onSettingClick={(el) => onSettingClick(el)}
           audio={audio}
-          onChangeVolimeMusic={(input) => changeVolimeMusic(input)}
-          onChangeVolimeSound={(input) => changeVolimeSound(input)}
-          switchMusic={() => switchMusic}
-          switchSound={() => switchSound}
+          changeVolime={(el) => changeVolime(el)}
+          switchOnAudio={(el) => switchOnAudio(el)}
+        />
+        )}
+      { popups.showStats > 0
+        && (
+        <Stats
+          close={() => changePopup('showStats', false)}
+          stats={stats}
         />
         )}
       { popups.showEndGame > 0
@@ -416,7 +480,7 @@ function App() {
         <EndGame
           title={popups.title}
           text={popups.text}
-          onClick={() => closePopupEndGame}
+          close={() => changePopup('showEndGame', false)}
         />
         )}
       <Footer />
