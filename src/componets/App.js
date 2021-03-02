@@ -11,61 +11,38 @@ import EndGame from './EndGame/EndGame';
 import Footer from './Footer/Footer';
 
 import {
-  shuffleArray,
   sleep,
   secondsToTime,
+  saveLS,
+  removeLS,
+  generateCards,
+  generateAudio,
 } from '../assets/utils';
 
-import cardsData from '../assets/cards';
 import audioData from '../assets/audio';
 
-function generateCards(count, type) {
-  const cards = shuffleArray(cardsData[type])
-    .slice(0, count / 2);
+function App({
+  inputSettings,
+  inputStats,
+  inputGame,
+}) {
+  console.log(inputSettings);
 
-  const cards2 = cards.concat(cards)
-    .map((item, index) => ({
-      id: index,
-      code: item.id,
-      img: `../../public/${type}/${item.img}`,
-      isFlip: false,
-      isGuess: false,
-    }));
+  const [settings, setSettings] = useState(inputSettings.settings);//настройки
 
-  return shuffleArray(cards2);
-}
-
-function generateAudio(arr, volume) {
-  const arrRes = {};
-
-  arr.forEach((item) => {
-    arrRes[item.name] = new Audio(`../../public/sound/${item.audio}`);
-    arrRes[item.name].volume = volume;
-  });
-
-  return arrRes;
-}
-
-function App() {
-  const [settings, setSettings] = useState({
-    totalCards: 12, //кол-во карт
-    typeCards: 'cards', //вид карт
-    failsLimit: 0, //лимит ошибок
-  });//настройки
-
-  const [time, setTime] = useState('00:00');//время
-  const [fails, setFails] = useState(0);//ошибок
+  const [time, setTime] = useState(inputGame.time);//время
+  const [fails, setFails] = useState(inputGame.fails);//ошибок
 
   const [audio, setAudio] = useState({
     music: {
-      list: generateAudio(audioData[0], 1),
-      volume: 1,
-      on: false,
+      list: generateAudio(audioData[0], inputSettings.audio.music.volume),
+      volume: inputSettings.audio.music.volume,
+      on: inputSettings.audio.music.on,
     },
     sound: {
-      list: generateAudio(audioData[1], 1),
-      volume: 1,
-      on: true,
+      list: generateAudio(audioData[1], inputSettings.audio.sound.volume),
+      volume: inputSettings.audio.sound.volume,
+      on: inputSettings.audio.sound.on,
     },
   });//аудио
 
@@ -77,92 +54,18 @@ function App() {
     showStats: false,
   });//попапы
 
-  const [workGame, setWorkGame] = useState(false);//работает ли игра
+  const [workGame, setWorkGame] = useState(inputGame.workGame);//работает ли игра
   const [endGame, setEndGame] = useState(false);//закончена ли игра
   const [disabledClick, setDisabledClick] = useState(false);//временный блок на нажатия
 
-  const [cards, setCards] = useState(generateCards(12, 'cards'));//карточки
-  const [firstCard, setFirstCard] = useState(null);//первая активная карта
-  const [secondCard, setSecondCard] = useState(null);//вторая активная карта
-  const [guessCards, setGuessCards] = useState(0);//кол-во угаданных карт
+  const [cards, setCards] = useState(inputGame.cards);//карточки
+  const [firstCard, setFirstCard] = useState(inputGame.firstCard);//первая активная карта
+  const [secondCard, setSecondCard] = useState(inputGame.secondCard);//вторая активная карта
+  const [guessCards, setGuessCards] = useState(inputGame.guessCards);//кол-во угаданных карт
 
-  const [timer, setTimer] = useState({
-    on: false, //запущен ли таймер
-    counter: 0, //секунд
-  });
+  const [timer, setTimer] = useState(inputGame.timer);
 
-  const [stats, setStats] = useState([
-    {
-      nameEndGame: 'Победа',
-      fails: 1,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Проигрыш',
-      fails: 2,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Победа',
-      fails: 3,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Проигрыш',
-      fails: 4,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Победа',
-      fails: 5,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Проигрыш',
-      fails: 6,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Победа',
-      fails: 7,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Проигрыш',
-      fails: 8,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Победа',
-      fails: 9,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-    {
-      nameEndGame: 'Проигрыш',
-      fails: 10,
-      time: '12:34',
-      totalCards: 12,
-      typeCards: 'cards',
-    },
-  ]);
+  const [stats, setStats] = useState(inputStats);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -306,7 +209,7 @@ function App() {
     }, 2000);
   }
 
-  async function resetGame() {
+  async function resetGame(newSettings) {
     console.log('resetGame');
 
     resetFirstAndSecondCards();
@@ -319,9 +222,16 @@ function App() {
       await sleep(1000);
     }
 
-    const newCards = await generateCards(settings.totalCards, settings.typeCards);
-    setCards(newCards);//я сосал
-    await sleep(1000);//меня ебали
+    let newCards;
+    if (newSettings) {
+      newCards = await generateCards(newSettings.totalCards, newSettings.typeCards);
+      console.log(newSettings, newCards);
+    } else {
+      newCards = await generateCards(settings.totalCards, settings.typeCards);
+    }
+
+    setCards(newCards);
+    await sleep(1000);
   }
 
   /*-------------------volime-----------------------*/
@@ -368,6 +278,20 @@ function App() {
     if (!fon.loop) fon.loop = true;
     if (fon.paused && audio.music.on) fon.play();
     if (!fon.paused && !audio.music.on) fon.pause();
+
+    saveLS('settings', {
+      settings,
+      audio: {
+        music: {
+          volume: audio.music.volume,
+          on: audio.music.on,
+        },
+        sound: {
+          volume: audio.sound.volume,
+          on: audio.sound.on,
+        },
+      },
+    });
   }, [audio]);
 
   /*-------------------settings-----------------------*/
@@ -381,16 +305,28 @@ function App() {
       value = Number(value);
     }
 
-    setSettings({
-      ...settings,
-      [name]: value,
+    const newSettings = { ...settings };
+    newSettings[name] = value;
+
+    setSettings(newSettings);
+
+    setWorkGame(false);
+    resetGame(newSettings);
+
+    saveLS('settings', {
+      settings: newSettings,
+      audio: {
+        music: {
+          volume: audio.music.volume,
+          on: audio.music.on,
+        },
+        sound: {
+          volume: audio.sound.volume,
+          on: audio.sound.on,
+        },
+      },
     });
   }
-
-  useEffect(() => {
-    setWorkGame(false);
-    resetGame();
-  }, [settings]);
 
   /*-------------------popup-----------------------*/
 
@@ -465,15 +401,13 @@ function App() {
     const newStats = stats.slice(0, 9);
     newStats.unshift(newItem);
 
+    saveLS('stats', newStats);
     setStats(newStats);
   }
 
   /*-------------------keyPress-----------------------*/
 
   function hotKey(e) {
-    //e.preventDefault();
-    console.log(e.keyCode);
-
     if (e.keyCode === 82) startGame();
     if (e.keyCode === 81) changePopup('showSettings', true);
     if (e.keyCode === 83) changePopup('showStats', true);
@@ -496,6 +430,29 @@ function App() {
     document.addEventListener('keydown', hotKey);
     return () => document.removeEventListener('keydown', hotKey);
   });
+
+  /*-------------------localStorage-----------------------*/
+
+  useEffect(() => {
+    if (!workGame) {
+      removeLS('game');
+      return;
+    }
+
+    const obj = {
+      settings,
+      time,
+      fails,
+      workGame,
+      cards,
+      firstCard,
+      secondCard,
+      guessCards,
+      timer,
+    };
+
+    saveLS('game', obj);
+  }, [audio, time, workGame]);
 
   /*-------------------return-----------------------*/
 

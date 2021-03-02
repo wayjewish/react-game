@@ -1,3 +1,5 @@
+import cardsData from './cards';
+
 function shuffleArray(array) {
   return array.sort(() => Math.random() - 0.5);
 }
@@ -27,8 +29,52 @@ function secondsToTime(secs) {
   return `${obj.m}:${obj.s}`;
 }
 
+function saveLS(name, obj) {
+  localStorage.setItem(name, JSON.stringify(obj));
+}
+
+function getLS(name) {
+  return JSON.parse(localStorage.getItem(name));
+}
+
+function removeLS(name) {
+  localStorage.removeItem(name);
+}
+
+function generateCards(count, type) {
+  const cards = shuffleArray(cardsData[type])
+    .slice(0, count / 2);
+
+  const cards2 = cards.concat(cards)
+    .map((item, index) => ({
+      id: index,
+      code: item.id,
+      img: `../../public/${type}/${item.img}`,
+      isFlip: false,
+      isGuess: false,
+    }));
+
+  return shuffleArray(cards2);
+}
+
+function generateAudio(arr, volume) {
+  const arrRes = {};
+
+  arr.forEach((item) => {
+    arrRes[item.name] = new Audio(`../../public/sound/${item.audio}`);
+    arrRes[item.name].volume = volume;
+  });
+
+  return arrRes;
+}
+
 export {
   shuffleArray,
   sleep,
   secondsToTime,
+  saveLS,
+  getLS,
+  removeLS,
+  generateCards,
+  generateAudio,
 };
