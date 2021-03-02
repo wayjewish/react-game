@@ -61,6 +61,15 @@ function Settings({
           </div>
         </div>
 
+        <div className="settings__list hot-key">
+          <div className="hot-key__item">R - Старт/Рестарт</div>
+          <div className="hot-key__item">Q - Настройки</div>
+          <div className="hot-key__item">S - Статистика</div>
+          <div className="hot-key__item">Z - Вкл/Выкл музыку</div>
+          <div className="hot-key__item">X - Вкл/Выкл звуки</div>
+          <div className="hot-key__item">F - Во весь экран</div>
+        </div>
+
       </div>
     </div>
   );

@@ -164,6 +164,8 @@ function App() {
     },
   ]);
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   /*-------------------card-----------------------*/
 
   function setCardFlip(activeCard, activeFlip) {
@@ -427,6 +429,28 @@ function App() {
     return () => clearInterval(setRunTimer);
   }, [timer]);
 
+  /*-------------------fullscreen-----------------------*/
+
+  function fsToggle() {
+    const el = document.getElementById('app');
+
+    if (isFullscreen) {
+      const rfs = document.cancelFullScreen
+      || document.webkitCancelFullScreen
+      || document.mozCancelFullScreen
+      || document.msCancelFullScreen;
+      rfs.call(document);
+    } else {
+      const rfs = el.requestFullscreen
+      || el.webkitRequestFullScreen
+      || el.mozRequestFullScreen
+      || el.msRequestFullscreen;
+      rfs.call(el);
+    }
+
+    setIsFullscreen(!isFullscreen);
+  }
+
   /*-------------------stats-----------------------*/
 
   function addInStats(nameEndGame) {
@@ -443,6 +467,35 @@ function App() {
 
     setStats(newStats);
   }
+
+  /*-------------------keyPress-----------------------*/
+
+  function hotKey(e) {
+    //e.preventDefault();
+    console.log(e.keyCode);
+
+    if (e.keyCode === 82) startGame();
+    if (e.keyCode === 81) changePopup('showSettings', true);
+    if (e.keyCode === 83) changePopup('showStats', true);
+    if (e.keyCode === 90) {
+      const newAudio = { ...audio };
+      newAudio.music.on = !newAudio.music.on;
+      setAudio(newAudio);
+    }
+    if (e.keyCode === 88) {
+      const newAudio = { ...audio };
+      newAudio.sound.on = !newAudio.sound.on;
+      setAudio(newAudio);
+    }
+    if (e.keyCode === 70) {
+      fsToggle();
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('keydown', hotKey);
+    return () => document.removeEventListener('keydown', hotKey);
+  });
 
   /*-------------------return-----------------------*/
 
@@ -483,7 +536,7 @@ function App() {
           close={() => changePopup('showEndGame', false)}
         />
         )}
-      <Footer />
+      <Footer isFullscreen={isFullscreen} fsToggle={fsToggle} />
     </div>
   );
 }

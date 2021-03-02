@@ -1,29 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import RSLogo from '../../../public/rs_school.svg';
 
-function Footer() {
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  function fsToggle() {
-    const el = document.getElementById('app');
-
-    if (isFullscreen) {
-      const rfs = document.cancelFullScreen
-      || document.webkitCancelFullScreen
-      || document.mozCancelFullScreen
-      || document.msCancelFullScreen;
-      rfs.call(document);
-    } else {
-      const rfs = el.requestFullscreen
-      || el.webkitRequestFullScreen
-      || el.mozRequestFullScreen
-      || el.msRequestFullscreen;
-      rfs.call(el);
-    }
-
-    setIsFullscreen(!isFullscreen);
-  }
-
+function Footer({ isFullscreen, fsToggle }) {
   return (
     <div className="footer">
       <div className="footer__item footer__item_info">
