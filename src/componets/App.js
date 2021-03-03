@@ -11,6 +11,7 @@ import EndGame from './EndGame/EndGame';
 import Footer from './Footer/Footer';
 
 import {
+  shuffleArray,
   sleep,
   secondsToTime,
   saveLS,
@@ -26,8 +27,6 @@ function App({
   inputStats,
   inputGame,
 }) {
-  console.log(inputSettings);
-
   const [settings, setSettings] = useState(inputSettings.settings);//настройки
 
   const [time, setTime] = useState(inputGame.time);//время
@@ -69,6 +68,8 @@ function App({
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  const [autoPlay, setAutoPlay] = useState(false);
+
   /*-------------------card-----------------------*/
 
   function setCardFlip(activeCard, activeFlip) {
@@ -104,6 +105,7 @@ function App({
     setGuessCards((prevCount) => prevCount + 2);
 
     resetFirstAndSecondCards();
+    if (autoPlay) selectRandom2Cards();
   }
 
   function onFailureGuess() {
@@ -117,14 +119,15 @@ function App({
     }, 900);
     setTimeout(() => {
       setCardFlip(secondCard, false);
-      setDisabledClick(false);
+      if (!autoPlay) setDisabledClick(false);
+      if (autoPlay) selectRandom2Cards();
     }, 1000);
 
     resetFirstAndSecondCards();
   }
 
   function onCardClick(card) {
-    if (!workGame || endGame || disabledClick || card.isFlip) return;
+    if (!workGame || endGame || (disabledClick && !autoPlay) || card.isFlip) return;
 
     setCardFlip(card, true);
 
@@ -204,8 +207,10 @@ function App({
     setCardFlipAll(true);
     setTimeout(() => {
       setCardFlipAll(false);
-      setDisabledClick(false);
       setCounter(true, 0);
+
+      if (!autoPlay) setDisabledClick(false);
+      if (autoPlay) selectRandom2Cards();
     }, 2000);
   }
 
@@ -454,6 +459,30 @@ function App({
     saveLS('game', obj);
   }, [audio, time, workGame]);
 
+  /*-------------------autoplay-----------------------*/
+
+  function toggleAutoPlay() {
+    if (!workGame && !autoPlay) {
+      startGame();
+    }
+
+    if (!workGame && autoPlay) {
+      resetGame();
+    }
+
+    setAutoPlay(!autoPlay);
+  }
+
+  function selectRandom2Cards() {
+    const cardsNotGuess = shuffleArray(cards).filter((card) => !card.isFlip);
+
+    onCardClick(cardsNotGuess[0]);
+
+    setTimeout(() => {
+      if (!autoPlay) onCardClick(cardsNotGuess[1]);
+    }, 500);
+  }
+
   /*-------------------return-----------------------*/
 
   return (
@@ -463,6 +492,8 @@ function App({
         fails={fails}
         textButton={workGame ? 'Рестарт' : 'Новая игра'}
         startGame={() => startGame()}
+        autoPlay={autoPlay}
+        toggleAutoPlay={() => setAutoPlay(!autoPlay)}
         showSettings={() => changePopup('showSettings', true)}
         showStats={() => changePopup('showStats', true)}
       />
