@@ -70,6 +70,12 @@ function App({
 
   const [autoPlay, setAutoPlay] = useState(false);
 
+  const [firstRender, setFirstRender] = useState(true);
+
+  useEffect(() => { //тк useEffect ведет себя не очевидно
+    if (firstRender) setFirstRender(false);
+  }, []);
+
   /*-------------------card-----------------------*/
 
   function setCardFlip(activeCard, activeFlip) {
@@ -105,7 +111,6 @@ function App({
     setGuessCards((prevCount) => prevCount + 2);
 
     resetFirstAndSecondCards();
-    if (autoPlay) selectRandom2Cards();
   }
 
   function onFailureGuess() {
@@ -114,20 +119,19 @@ function App({
     playAudio('fail', 'sound');
     setFails(fails + 1);
 
-    setTimeout(() => {
-      setCardFlip(firstCard, false);
-    }, 900);
-    setTimeout(() => {
-      setCardFlip(secondCard, false);
-      if (!autoPlay) setDisabledClick(false);
-      if (autoPlay) selectRandom2Cards();
-    }, 1000);
+    //setTimeout(() => {
+    setCardFlip(firstCard, false);
+    //}, 900);
+    //setTimeout(() => {
+    setCardFlip(secondCard, false);
+    setDisabledClick(false);
+    //}, 1000);
 
     resetFirstAndSecondCards();
   }
 
   function onCardClick(card) {
-    if (!workGame || endGame || (disabledClick && !autoPlay) || card.isFlip) return;
+    if (!workGame || endGame || disabledClick || card.isFlip) return;
 
     setCardFlip(card, true);
 
@@ -156,6 +160,8 @@ function App({
 
       addInStats('Победа');
 
+      if (autoPlay) setAutoPlay(false);
+
       return;
     }
 
@@ -176,6 +182,8 @@ function App({
 
       addInStats('Проигрыш');
 
+      if (autoPlay) setAutoPlay(false);
+
       return;
     }
 
@@ -186,6 +194,8 @@ function App({
     } else {
       onFailureGuess();
     }
+
+    if (autoPlay) selectRandom2Cards();
   }, [firstCard, secondCard, guessCards]);
 
   /*-------------------Game-----------------------*/
@@ -209,7 +219,8 @@ function App({
       setCardFlipAll(false);
       setCounter(true, 0);
 
-      if (!autoPlay) setDisabledClick(false);
+      setDisabledClick(false);
+
       if (autoPlay) selectRandom2Cards();
     }, 2000);
   }
@@ -230,7 +241,6 @@ function App({
     let newCards;
     if (newSettings) {
       newCards = await generateCards(newSettings.totalCards, newSettings.typeCards);
-      console.log(newSettings, newCards);
     } else {
       newCards = await generateCards(settings.totalCards, settings.typeCards);
     }
@@ -461,27 +471,37 @@ function App({
 
   /*-------------------autoplay-----------------------*/
 
-  function toggleAutoPlay() {
-    if (!workGame && !autoPlay) {
-      startGame();
-    }
+  async function selectRandom2Cards() {
+    console.log(cards);
+    const arr = cards.slice(0);
 
-    if (!workGame && autoPlay) {
-      resetGame();
-    }
+    const cardsNotGuess = shuffleArray(arr)
+      .filter((card) => (!card.isGuess && card.isFlip) || !card.isFlip);
 
-    setAutoPlay(!autoPlay);
+    console.log('selectRandom2Cards', cardsNotGuess, cardsNotGuess[0].id, cardsNotGuess[1].id);
+
+    await sleep(1000);
+    setCardFlip(cardsNotGuess[0], true);
+    //await sleep(1000);
+    setCardFlip(cardsNotGuess[1], true);
+    await sleep(1000);
+
+    setFirstCard(cardsNotGuess[0]);
+    setSecondCard(cardsNotGuess[1]);
   }
 
-  function selectRandom2Cards() {
-    const cardsNotGuess = shuffleArray(cards).filter((card) => !card.isFlip);
+  useEffect(() => {
+    if (!firstRender) {
+      if (!workGame && autoPlay) {
+        startGame();
+      }
 
-    onCardClick(cardsNotGuess[0]);
-
-    setTimeout(() => {
-      if (!autoPlay) onCardClick(cardsNotGuess[1]);
-    }, 500);
-  }
+      if (workGame && !autoPlay) {
+        setWorkGame(false);
+        resetGame();
+      }
+    }
+  }, [autoPlay]);
 
   /*-------------------return-----------------------*/
 
