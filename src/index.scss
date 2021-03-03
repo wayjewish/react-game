@@ -1,0 +1,357 @@
+
+
+#app {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width:100%;
+    padding: 20px;
+    margin: 0;
+    box-sizing: border-box;
+    background: #fff;
+
+    font-family: cursive;
+    font-size: 16px;
+}
+
+.game {
+    position: relative;
+
+    width:100%;
+    margin: 0 auto;
+
+    @media (min-width:768px) {
+        & {
+            width: 700px;
+        }
+    }
+    @media (min-width:1200px) {
+        & {
+            width: 800px;
+        }
+    }
+    @media (min-width:1500px) {
+        & {
+            width: 1000px;
+        }
+    }
+    @media (min-width: 1700px) {
+        & {
+            /*width: 1200px;*/
+        }
+    }
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 30px;
+
+    
+
+    @media (min-width:768px) {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    &__params{
+        font-size: 20px;
+    }
+
+    & .button {
+        margin-top: 10px;
+    }
+    @media (min-width:768px) {
+        & .button {
+            margin-top: 0;
+        }
+    }
+}
+
+.cards {
+    display: grid;
+    justify-content: center;
+    grid-gap: 5px;
+  
+    overflow: hidden;
+
+    &_count8 {
+        grid-template-columns: repeat(4, auto);
+        grid-template-rows: repeat(2, 1fr);
+    }
+    &_count12 {
+        grid-template-columns: repeat(4, auto);
+        grid-template-rows: repeat(3, 1fr);
+    }
+  
+    @media (min-width:768px) {
+        & {
+            grid-gap: 10px;
+            height: 310px;
+        }
+
+        &_count12 {
+            grid-template-columns: repeat(6, auto);
+            grid-template-rows: repeat(2, 1fr);
+        }
+    }
+    @media (min-width:1200px) {
+        & {
+            grid-gap: 15px;
+            height: 343px;
+        }
+    }
+    @media (min-width:1500px) {
+        & {
+            grid-gap: 20px;
+            height: 430px;
+        }
+    }
+  }
+
+  .card {
+    position: relative;
+    display: flex;
+    width: 107px;
+    height: 150px;
+
+    border: 2px solid #bababa;
+    border-radius: 20px;
+    box-sizing: border-box;
+    cursor: pointer;
+  
+    transform: rotateY(180deg);
+    transform-style: preserve-3d;
+    transition: transform 0.8s, border-color .8s;
+
+    @media (min-width:768px) {
+        & {
+            width: 108px;
+            height: 150px;
+        }
+    }
+    @media (min-width:1200px) {
+        & {
+            width: 120px;
+            height: 164px;
+        }
+    }
+    @media (min-width:1500px) {
+        & {
+            width: 146px;
+            height: 205px;
+        }
+    }
+  
+    &_flip {
+        transform: rotateY(0deg);
+    }
+  
+    &__img {
+        width: 100%;
+        height: 100%;
+        border-radius: 18px;
+  
+        backface-visibility: hidden;
+    }
+  
+    &__back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+  
+        width: 100%;
+        height: 100%;
+  
+        border-radius: 18px;
+        transform: rotateY(180deg);
+        background: linear-gradient(45deg, #1fa5ff 0%, #1053ff 100%) no-repeat;
+        background-size: 100%;
+  
+        backface-visibility: hidden;
+    }
+  }
+
+.settings {
+
+    input {
+        cursor: pointer;
+    }
+}
+
+.setting {
+    &__name {
+        margin-bottom: 5px;
+
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    &__list {
+        display: flex;
+        align-items: center;
+        margin: 0 -10px;
+
+        button {
+            font-size: 15px;
+            margin: 0 5px 5px;
+        }
+
+        .active {
+            border: 2px solid #000;
+        }
+    }
+
+    @media (min-width:768px) {
+        &__name {
+            margin-bottom: 10px;
+    
+            font-size: 20px;
+        }
+
+        button {
+            font-size: 20px;
+            margin: 0 10px 10px;
+        }
+    }
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+
+    &__wrap {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        max-width: calc(100% - 20px);
+        padding: 20px;
+
+        border: 1px solid #8e8e8e;
+        border-radius: 15px;
+        box-shadow: 0 2px 8px 0 #c9c9c9;
+        background: #fff;
+        overflow: auto;
+
+        @media (min-width:768px) {
+            padding: 30px;
+        }
+    }
+
+    &__close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+
+        border: none;
+        background: none;
+        cursor: pointer;
+
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+.stats {
+
+    &__list {
+        width: 100%;
+    }
+
+
+
+    &-head,
+    &-game {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &__name-end-game {
+            width: 100px;
+        }
+    }
+
+    
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    padding: 3px 5px;
+    border: 2px solid #bababa;
+    border-radius: 10px;
+    background: linear-gradient( 45deg, #1fa5ff 0%, #1053ff 100%) no-repeat;
+    box-shadow: 0 2px 8px 0 #c9c9c9;
+    cursor: pointer;
+
+    color: #fff;
+    font-size: 14px;
+
+    &:hover {
+        background: linear-gradient(45deg, #1fb9ff 0%, #107bff 100%) no-repeat;
+        box-shadow: none;
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    @media (min-width:768px) {
+        padding: 5px 10px;
+
+        font-size: 16px;
+    }
+}
+
+.footer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-top: 20px;
+
+    @media (min-width:768px) {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    &__item {
+        display: flex;
+        flex-direction: column;
+
+        margin-top: 10px;
+
+        @media (min-width:768px) {
+            margin-top: 0;
+        }
+    }
+
+    img {
+        width: 70px;
+        margin-top: 10px;
+    }
+}
+
+.hot-key {
+    
+}
