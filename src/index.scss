@@ -186,9 +186,9 @@
 
 .setting {
     &__name {
-        margin-bottom: 10px;
+        margin-bottom: 5px;
 
-        font-size: 20px;
+        font-size: 15px;
         font-weight: bold;
     }
 
@@ -198,12 +198,25 @@
         margin: 0 -10px;
 
         button {
-            font-size: 20px;
-            margin: 0 10px 10px;
+            font-size: 15px;
+            margin: 0 5px 5px;
         }
 
         .active {
             border: 2px solid #000;
+        }
+    }
+
+    @media (min-width:768px) {
+        &__name {
+            margin-bottom: 10px;
+    
+            font-size: 20px;
+        }
+
+        button {
+            font-size: 20px;
+            margin: 0 10px 10px;
         }
     }
 }
@@ -228,12 +241,17 @@
         justify-content: center;
 
         max-width: calc(100% - 20px);
-        padding: 30px;
+        padding: 20px;
 
         border: 1px solid #8e8e8e;
         border-radius: 15px;
         box-shadow: 0 2px 8px 0 #c9c9c9;
         background: #fff;
+        overflow: auto;
+
+        @media (min-width:768px) {
+            padding: 30px;
+        }
     }
 
     &__close {
@@ -278,7 +296,7 @@
     align-items: center;
     justify-content: center;
     
-    padding: 5px 10px;
+    padding: 3px 5px;
     border: 2px solid #bababa;
     border-radius: 10px;
     background: linear-gradient( 45deg, #1fa5ff 0%, #1053ff 100%) no-repeat;
@@ -286,6 +304,7 @@
     cursor: pointer;
 
     color: #fff;
+    font-size: 14px;
 
     &:hover {
         background: linear-gradient(45deg, #1fb9ff 0%, #107bff 100%) no-repeat;
@@ -294,6 +313,12 @@
 
     &:focus {
         outline: none;
+    }
+
+    @media (min-width:768px) {
+        padding: 5px 10px;
+
+        font-size: 16px;
     }
 }
 
